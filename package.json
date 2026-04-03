@@ -1,0 +1,40 @@
+{
+  "name": "comptia-learning-app",
+  "version": "1.0.0",
+  "description": "CompTIA A+ Core 2: Communication & Professionalism - Desktop Learning App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.learning.comptia-a-plus",
+    "productName": "CompTIA Learning",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "icons/**"
+    ],
+    "mac": {
+      "category": "public.app-category.education"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Education"
+    }
+  },
+  "keywords": ["comptia", "learning", "education"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^41.1.1",
+    "electron-builder": "^26.0.12"
+  }
+}
