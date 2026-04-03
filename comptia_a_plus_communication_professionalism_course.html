@@ -1,0 +1,481 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.shell{display:flex;height:600px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
+.sidebar{width:240px;min-width:240px;background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-header{padding:14px 16px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.06em}
+.nav-item{padding:10px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;display:flex;flex-direction:column;gap:3px}
+.nav-item:hover{background:var(--color-background-primary)}
+.nav-item.active{border-left-color:#185FA5;background:var(--color-background-primary)}
+.nav-item .nav-title{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3}
+.nav-item .nav-status{font-size:11px;color:var(--color-text-tertiary)}
+.nav-item.done .nav-status{color:#3B6D11}
+.nav-item.active .nav-title{color:#185FA5}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.lesson-view{padding:28px 32px;flex:1}
+.lesson-tag{font-size:11px;font-weight:500;color:#185FA5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.lesson-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;line-height:1.3}
+.lesson-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:24px}
+.section-h{font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin:20px 0 10px}
+.card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:14px 16px;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px}
+.card-body{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.tip{background:#E6F1FB;border:0.5px solid #B5D4F4;border-radius:var(--border-radius-md);padding:12px 14px;margin:14px 0;font-size:13px;color:#0C447C;line-height:1.6}
+.tip strong{font-weight:500}
+.warn{background:#FAEEDA;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:12px 14px;margin:14px 0;font-size:13px;color:#633806;line-height:1.6}
+.scenario{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:16px;margin:14px 0}
+.scenario-label{font-size:11px;font-weight:500;color:#185FA5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.scenario-text{font-size:13px;color:var(--color-text-primary);line-height:1.6;margin-bottom:10px}
+.scenario-answer{font-size:13px;color:#3B6D11;line-height:1.6;display:none}
+.scenario-answer.show{display:block}
+.reveal-btn{font-size:12px;color:#185FA5;cursor:pointer;border:0.5px solid #B5D4F4;background:#E6F1FB;padding:5px 12px;border-radius:var(--border-radius-md);margin-top:6px}
+.reveal-btn:hover{background:#B5D4F4}
+.bottom-bar{padding:16px 32px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:10px;justify-content:space-between;align-items:center;background:var(--color-background-primary)}
+.btn-primary{padding:8px 20px;background:#185FA5;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.btn-primary:hover{background:#0C447C}
+.btn-sec{padding:8px 20px;background:transparent;color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer}
+.btn-sec:hover{background:var(--color-background-secondary)}
+.progress-bar{height:4px;background:var(--color-border-tertiary);border-radius:2px;flex:1;overflow:hidden}
+.progress-fill{height:100%;background:#185FA5;transition:width .3s}
+.quiz-view{padding:28px 32px}
+.q-num{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px}
+.q-text{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:20px;line-height:1.5}
+.q-opt{padding:12px 16px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:14px;color:var(--color-text-primary);cursor:pointer;margin-bottom:8px;transition:all .15s}
+.q-opt:hover{background:var(--color-background-secondary)}
+.q-opt.selected{border-color:#185FA5;background:#E6F1FB;color:#0C447C}
+.q-opt.correct{border-color:#3B6D11;background:#EAF3DE;color:#27500A}
+.q-opt.wrong{border-color:#A32D2D;background:#FCEBEB;color:#791F1F}
+.q-feedback{padding:12px 14px;border-radius:var(--border-radius-md);font-size:13px;margin-top:12px;line-height:1.6;display:none}
+.q-feedback.show{display:block}
+.q-feedback.ok{background:#EAF3DE;color:#27500A}
+.q-feedback.no{background:#FCEBEB;color:#791F1F}
+.score-view{padding:40px 32px;text-align:center}
+.score-big{font-size:48px;font-weight:500;color:#185FA5;margin:16px 0 4px}
+.score-label{font-size:14px;color:var(--color-text-secondary)}
+.badge{display:inline-block;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;margin-bottom:8px}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+.kv{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.kv-key{font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:130px}
+.kv-val{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+</style>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="sidebar-header">Course Contents</div>
+    <div id="nav"></div>
+  </div>
+  <div class="main" id="main-area"></div>
+</div>
+
+<script>
+const modules = [
+  {
+    id:0, title:"Course Overview", status:"not started",
+    type:"lesson",
+    tag:"Introduction",
+    sub:"What this course covers and why it matters for the A+ exam",
+    sections:[
+      {h:"About this course", cards:[
+        {t:"What you'll learn",b:"This course covers Domain 4 of the CompTIA A+ Core 2 (220-1102) exam — Operational Procedures, which accounts for 22% of the exam. You'll master communication, professionalism, soft skills, and ethical conduct required of IT support technicians."},
+        {t:"Why it matters",b:"Technical skill alone doesn't make a great IT tech. CompTIA dedicates over one-fifth of the exam to interpersonal and professional skills because employers consistently rank communication as the #1 differentiator in support roles."},
+        {t:"How to use this course",b:"Work through each lesson in order. Every module ends with a scenario-based practice section. After all lessons, take the 10-question knowledge check to test your readiness."}
+      ]},
+      {h:"Learning objectives", cards:[
+        {t:"Core skills you'll develop",b:"Develop critical soft skills and customer support strategies. Communicate professionally using positive, jargon-free language. De-escalate tense situations and take ownership of issues. Recognize cultural differences and collaborate remotely. Manage time, documentation, and ticket workflows. Handle confidential data ethically and legally."}
+      ]},
+      {h:"Exam tip", tip:true, body:"Operational Procedures questions on the A+ exam are scenario-based. They describe a real situation and ask what a technician SHOULD do. Focus on the behavior, not just the definition."}
+    ]
+  },
+  {
+    id:1, title:"Proper Language and Positive Attitude", status:"not started",
+    type:"lesson",
+    tag:"Module 1",
+    sub:"Using professional language and maintaining a positive, helpful demeanor",
+    sections:[
+      {h:"Core concepts", cards:[
+        {t:"Use jargon-free language",b:"Always match your language to the customer's technical level. Saying 'your RAM is corrupted' to a non-technical user causes confusion. Instead, say 'your computer's short-term memory has a problem — I'll replace the part.' Check for understanding by asking 'Does that make sense so far?'"},
+        {t:"Avoid negative phrasing",b:"Reframe negative statements positively. Instead of 'I can't fix this today,' say 'I can have this resolved for you by tomorrow morning.' Instead of 'That's not my department,' say 'Let me connect you with the right person who can help you with that.'"},
+        {t:"Maintain a professional appearance",b:"Dress appropriately for the environment. In corporate settings, business casual is standard. Your appearance signals respect for the customer and the organization. Avoid excessive perfume or cologne in customer environments — some people have sensitivities."},
+        {t:"Active listening signals",b:"Show you're engaged: maintain eye contact, nod, avoid interrupting, and use verbal cues like 'I understand' or 'go on.' Do not check your phone or computer for unrelated tasks while a customer is speaking."}
+      ]},
+      {h:"Practical techniques", cards:[
+        {t:"The LAST framework",b:"Listen — let the customer fully explain. Apologize — acknowledge their frustration. Solve — work on the problem together. Thank — express appreciation for their patience. This structure works for most customer interactions."},
+        {t:"Be on time",b:"Punctuality is professionalism. If you're running late, call ahead. If you give an ETA, meet it. If something changes, communicate it proactively — never make the customer follow up with you about delays."}
+      ]},
+      {h:"Scenarios", scenarios:[
+        {q:"A frustrated user says: 'This computer is garbage and nobody ever fixes anything around here!' How do you respond?", a:"Acknowledge their frustration first: 'I completely understand how frustrating that is — let me take a look right now and make sure we get this sorted out for you.' Never get defensive or dismissive. Empathy first, solution second."},
+        {q:"A user asks you to explain what you're doing while you work on their PC. What's the best approach?",a:"Narrate your actions in plain language: 'I'm checking which programs start automatically when you boot up — sometimes those can slow things down. I'll disable the ones you don't need.' This builds trust and educates the user."}
+      ]}
+    ]
+  },
+  {
+    id:2, title:"Handling Difficult Customers and Escalations", status:"not started",
+    type:"lesson",
+    tag:"Module 2",
+    sub:"De-escalation techniques, managing conflict, and knowing when to escalate",
+    sections:[
+      {h:"De-escalation principles", cards:[
+        {t:"Stay calm and lower your voice",b:"When a customer raises their voice, respond in a calm, measured tone. Lowering your own volume actually encourages others to match your energy. Never raise your voice or argue back — it escalates the situation immediately."},
+        {t:"Avoid arguing even when you're right",b:"Being 'right' is less important than resolving the issue. If a customer is factually incorrect, gently correct them: 'What may have happened is...' rather than 'That's wrong.' Your goal is resolution, not debate."},
+        {t:"Do not minimize the problem",b:"Avoid phrases like 'It's just a small issue' or 'That shouldn't take long.' These feel dismissive to the customer. Instead, validate: 'I can see why that's a problem for you — let's get it fixed.'"},
+        {t:"Take ownership",b:"Use 'I will...' statements. 'I will call you back by 3pm with an update.' 'I will personally make sure this is escalated.' Ownership builds trust. Passing blame to other departments or vendors makes the customer feel abandoned."}
+      ]},
+      {h:"When to escalate", cards:[
+        {t:"Escalation triggers",b:"Escalate when: the issue is outside your skill level or access, the customer requests a supervisor, the issue involves data loss or security, the problem has been unresolved past the agreed SLA, or the customer is threatening legal action or making credible complaints."},
+        {t:"How to escalate properly",b:"Warm-transfer: introduce the customer to the next-level tech and give them a full brief before stepping away. Never cold-transfer — 'explaining your problem again to someone else' is one of the top customer frustration points."},
+        {t:"Document everything first",b:"Before escalating, document: what the customer reported, what you tried, what the result was, and the exact current state. This prevents the next technician from starting from scratch."}
+      ]},
+      {h:"Scenarios", scenarios:[
+        {q:"A customer is yelling and says 'I've been on hold for 45 minutes and this is unacceptable!' What do you do?",a:"Validate immediately: 'You're absolutely right — 45 minutes is too long and I apologize for that. I'm here now and I'm going to focus entirely on your issue.' Never argue about the hold time. Acknowledge, apologize, move forward."},
+        {q:"A user's issue requires access to a system you don't have permissions for. What's the correct action?",a:"Be transparent: 'I don't have access to that system — I'm going to get our [team/level 2 support] involved right away. Here's what I've already tried so they don't repeat anything.' Document your findings and escalate with a full handoff."}
+      ]}
+    ]
+  },
+  {
+    id:3, title:"Cross-Cultural Communication and Sensitivity", status:"not started",
+    type:"lesson",
+    tag:"Module 3",
+    sub:"Respecting diversity and communicating effectively across cultural differences",
+    sections:[
+      {h:"Key principles", cards:[
+        {t:"Avoid assumptions based on appearance",b:"Never make assumptions about a user's technical skill level, language preference, or communication style based on how they look or their name. Treat every user as an individual and gauge their technical level from the conversation itself."},
+        {t:"Be aware of communication style differences",b:"Some cultures communicate very directly; others are more indirect or formal. Some users may say 'yes' to acknowledge hearing you, not to agree. Use confirming questions: 'Does that match what you were experiencing?' rather than 'Do you understand?'"},
+        {t:"Use plain, neutral language",b:"Avoid idioms, sports metaphors, or culturally specific references. Phrases like 'hit the ground running' or 'ball in your court' can confuse non-native English speakers. Stick to clear, literal language."},
+        {t:"Be patient with language barriers",b:"Speak clearly at a moderate pace. Don't raise your volume — speaking louder doesn't help comprehension. Offer to follow up in writing with a summary of what was discussed. Never mock or imitate an accent."}
+      ]},
+      {h:"Remote and global teams", cards:[
+        {t:"Working with global colleagues",b:"When collaborating with IT teams across time zones, be explicit about deadlines (specify time zone), use async communication tools effectively, and never assume everyone celebrates the same holidays or has the same work schedule norms."},
+        {t:"Written communication standards",b:"In multicultural environments, written communication is often clearer than verbal. Use bullet points for clarity, keep sentences short, and confirm understanding by asking for a summary back."}
+      ]},
+      {h:"Exam tip", tip:true, body:"CompTIA A+ exam questions on this topic often involve a scenario where a technician behaves inappropriately — making an assumption, using dismissive language, or being impatient. The correct answer always reflects respect, patience, and inclusive communication."}
+    ]
+  },
+  {
+    id:4, title:"Time Management and Support Documentation", status:"not started",
+    type:"lesson",
+    tag:"Module 4",
+    sub:"Setting expectations, managing tickets, and documenting effectively",
+    sections:[
+      {h:"Setting expectations with customers", cards:[
+        {t:"Give realistic timelines",b:"Always give a time estimate. 'I'll have an update for you by end of day' is better than leaving the user wondering. If you can't fix it today, say so upfront: 'This will take until tomorrow — here's a workaround you can use in the meantime.'"},
+        {t:"Communicate status proactively",b:"Don't wait for the customer to follow up. Proactive updates — even just 'Still working on it, no change yet' — dramatically improve customer satisfaction scores and reduce repeat contact."},
+        {t:"Set boundaries professionally",b:"If a customer is calling repeatedly and slowing your work, it's acceptable to say: 'I want to give this my full attention — let me call you back at [specific time] with a full update.' Then actually call at that time."}
+      ]},
+      {h:"Ticket and documentation best practices", cards:[
+        {t:"What to document in every ticket",b:"Date/time, customer name and contact info, description of the problem (in the customer's words), steps you took, results of each step, current status, next action and owner, and resolution details if solved. Think: can someone else pick this up without asking questions?"},
+        {t:"Update tickets in real time",b:"Don't batch-update at end of day. Log actions as you take them. This creates an accurate record and keeps supervisors and customers informed without them having to ask."},
+        {t:"Knowledge base contributions",b:"When you solve a problem that took real effort, write it up. A clear article — problem description, root cause, solution — saves the next technician hours and reduces customer downtime."}
+      ]},
+      {h:"Scenarios", scenarios:[
+        {q:"A user says 'When will my laptop be fixed?' You're not sure yet. What do you say?",a:"Give a committed response, not a vague one: 'I'll have a full diagnosis done by noon and I'll call you with a timeline at that point.' Never say 'I don't know' without giving a next step and time commitment."},
+        {q:"You resolved a ticket but didn't document the solution. Is this a problem?",a:"Yes — this is a significant professional failure. Without documentation, the next time this problem occurs you or a colleague starts from scratch. Ticket closure requires documented resolution steps. Always close tickets with a full description of what fixed the issue."}
+      ]}
+    ]
+  },
+  {
+    id:5, title:"Confidentiality and Ethical Guidelines", status:"not started",
+    type:"lesson",
+    tag:"Module 5",
+    sub:"Handling sensitive data, respecting privacy, and avoiding ethical violations",
+    sections:[
+      {h:"Data privacy fundamentals", cards:[
+        {t:"PII — Personally Identifiable Information",b:"PII includes names, addresses, SSNs, credit card numbers, medical records, and anything that can identify a specific person. As an IT tech, you may encounter PII while working on user machines. You must not view, copy, or share this data beyond what's required for the task."},
+        {t:"Handle data with minimum necessary access",b:"Only access what you need to complete the task. If you're fixing a network issue, you don't need to open the user's documents folder. Document any instances where you accessed sensitive data and why."},
+        {t:"Never share credentials",b:"Users sometimes offer their passwords to make your job easier. Decline: 'Let me use my own admin credentials.' If a user's credentials must be reset, document the reset and inform the user to change their password immediately after."}
+      ]},
+      {h:"Prohibited content and activities", cards:[
+        {t:"What to do if you find illegal content",b:"If you discover illegal content on a user's device (e.g., illegal media), do not touch it, do not discuss it with coworkers, and immediately report it to your supervisor and/or legal/HR per your organization's incident response policy. Chain of custody matters."},
+        {t:"Personal use vs. corporate use",b:"Corporate devices are for business use. Using them for personal tasks — streaming, shopping, personal email — may violate policy and could create security risks. As a technician, you enforce this policy and must not engage in it yourself."},
+        {t:"Social media and confidentiality",b:"Never post about customer issues, company infrastructure, or work incidents on social media — even without naming names. You could reveal configuration details, security gaps, or customer information that should be confidential."}
+      ]},
+      {h:"Key warning", warn:true, body:"On the A+ exam, if a scenario involves you finding suspicious content, the correct answer is ALWAYS to report it through proper channels — never investigate it yourself, delete it, or tell the user you found it."}
+    ]
+  },
+  {
+    id:6, title:"Soft Skills Workshop: Active Listening and Rapport", status:"not started",
+    type:"lesson",
+    tag:"Module 6",
+    sub:"Building trust through active listening and effective rapport-building",
+    sections:[
+      {h:"Active listening techniques", cards:[
+        {t:"Let the user finish speaking",b:"This is harder than it sounds. Resist the urge to jump in with a solution the moment you think you know the answer. Users who feel heard are more cooperative and more accurately report symptoms. Rushing to solve can cause you to miss the real issue."},
+        {t:"Clarify with open-ended questions",b:"Instead of 'Is it slow?' ask 'Can you walk me through exactly what happens when you try to open the application?' Open-ended questions surface more information and prevent you from leading the customer toward your assumption."},
+        {t:"Restate to confirm",b:"'So just to make sure I understand — the printer works for everyone on the second floor but not for your team on the third floor, and this started after yesterday's Windows update. Is that right?' Restating confirms understanding and shows you were listening."},
+        {t:"Avoid distractions",b:"Give the customer your full attention. Step away from your keyboard if you're talking in person. Don't have side conversations. Put your phone away. Distracted listening leads to missed details and repeat contacts."}
+      ]},
+      {h:"Building rapport", cards:[
+        {t:"Use the customer's name",b:"Use their name naturally in the conversation. 'So Maria, what I'm seeing is...' It sounds simple, but using names builds a personal connection that makes interactions feel less transactional."},
+        {t:"Find common ground",b:"If a customer mentions their industry or role, acknowledge it: 'That makes sense for an accounting workflow — let me make sure your setup handles month-end reporting without issues.' Showing you understand their context builds trust quickly."},
+        {t:"Follow up after resolution",b:"A quick follow-up call or email 24 hours after fixing a problem ('Just checking in to make sure everything is still working well!') turns a transaction into a relationship. It also catches any lingering issues early."}
+      ]},
+      {h:"Exam tip", tip:true, body:"Active listening is tested through 'what should the technician do first?' questions. The answer is almost always to ask a clarifying question or let the user explain — not to immediately start fixing something."}
+    ]
+  },
+  {
+    id:7, title:"Customer Self-Service Resource Creation", status:"not started",
+    type:"lesson",
+    tag:"Module 7",
+    sub:"Creating guides, FAQs, and knowledge base articles that empower users",
+    sections:[
+      {h:"Why self-service matters", cards:[
+        {t:"Reduce repeat tickets",b:"The most common IT issues — password resets, VPN setup, printer mapping — can be solved by users themselves if they have clear documentation. Every good knowledge base article you write potentially saves you and your team hours per week."},
+        {t:"Empower users, don't create dependency",b:"A good IT technician aims to make themselves slightly less necessary for routine tasks. Teaching a user to do something for themselves — with a clear guide — is a service win, not a threat to your job."}
+      ]},
+      {h:"Writing effective guides", cards:[
+        {t:"Know your audience",b:"Write for the least technical user who might need this guide. Use screenshots when possible. Number every step. Use imperative verbs: 'Click', 'Open', 'Type'. Avoid pronouns that assume knowledge: instead of 'it', name the element specifically."},
+        {t:"Structure every article the same way",b:"Title: plain language description of the problem. Symptoms: what the user sees. Solution: numbered steps. Alternative steps if step 1 doesn't work. Contact: what to do if the guide doesn't help. Consistent structure makes guides faster to use under stress."},
+        {t:"Test it with a real user",b:"Before publishing, give your guide to someone unfamiliar with the task and watch them follow it. Where they get confused — that's a gap you need to fill. Never publish a guide you haven't tested."}
+      ]},
+      {h:"Scenarios", scenarios:[
+        {q:"Users keep submitting tickets asking how to connect to the VPN from home. What's the proactive solution?",a:"Write a clear, step-by-step VPN setup guide with screenshots and publish it to your company's self-service portal. Email the link to all remote users. Add a link to the auto-response on the IT helpdesk email. Track whether VPN-related tickets decrease."},
+        {q:"A user says your knowledge base article 'didn't work' for them. What do you do?",a:"First help them solve the problem directly. Then review the article to find the gap — was a step unclear? Did the interface change? Update the article and note the date of revision. Thank the user for the feedback — they've improved the resource for everyone."}
+      ]}
+    ]
+  },
+  {
+    id:8, title:"Customer Satisfaction: Finalizing and Reporting", status:"not started",
+    type:"lesson",
+    tag:"Module 8",
+    sub:"Properly closing interactions, gathering feedback, and measuring satisfaction",
+    sections:[
+      {h:"Closing an interaction correctly", cards:[
+        {t:"Confirm resolution before closing",b:"Never close a ticket because you believe the issue is fixed. Confirm with the user: 'I've made the changes — can you test it on your end and let me know if everything is working?' Only close after the user confirms resolution."},
+        {t:"Explain what you did",b:"Before you leave or close the ticket, explain the root cause and solution in plain language: 'Your profile had become corrupted — I rebuilt it and your settings should all be back. This can happen after a crash, so I've also turned on automatic backups.' This educates and builds trust."},
+        {t:"Set expectations for the future",b:"If the problem is likely to recur or requires monitoring, tell the user: 'Keep an eye on this over the next few days — if you notice it again, call us right away and we'll escalate.' Don't leave them wondering what to do if it happens again."}
+      ]},
+      {h:"Gathering and acting on feedback", cards:[
+        {t:"Customer satisfaction surveys (CSAT)",b:"Many IT orgs send a short survey after ticket closure. Encourage customers to complete it: 'You may get a quick survey — your feedback genuinely helps us improve.' High CSAT scores are professional achievements. Review low scores without defensiveness."},
+        {t:"Use feedback to improve",b:"Recurring negative feedback on the same issue indicates a systemic problem — a policy, a process, or a knowledge gap — not just a bad day. Bring patterns to your supervisor or team meetings with data, not just anecdotes."}
+      ]},
+      {h:"Exam tip", tip:true, body:"A+ exam questions on closing interactions almost always reward the answer that confirms resolution WITH the customer before ending. The wrong answers involve closing the ticket remotely without checking or rushing to the next call."}
+    ]
+  },
+  {
+    id:9, title:"Course Summary", status:"not started",
+    type:"lesson",
+    tag:"Summary",
+    sub:"Key takeaways and exam preparation checklist",
+    sections:[
+      {h:"What you've learned", cards:[
+        {t:"Communication fundamentals",b:"Use jargon-free, positive language. Match your communication style to the customer's level. Maintain professional appearance and punctuality. Practice active listening with open-ended questions and restating."},
+        {t:"Handling difficult situations",b:"De-escalate by staying calm and taking ownership. Know when and how to escalate properly — with a warm handoff and full documentation. Never argue even when you're right."},
+        {t:"Ethics and confidentiality",b:"Protect PII. Use minimum necessary access. Report prohibited content through proper channels. Never share credentials. Maintain confidentiality on social media."},
+        {t:"Documentation and follow-through",b:"Set realistic expectations. Update tickets in real time. Confirm resolution with the customer before closing. Write knowledge base articles that prevent repeat tickets."}
+      ]},
+      {h:"Exam checklist", cards:[
+        {t:"For scenario questions, ask yourself",b:"Would a professional, respectful technician do this? Does the answer involve listening first? Does it involve documenting? Does it involve escalating when appropriate? Is it the most ethical option? The A+ always rewards professionalism over shortcuts."}
+      ]},
+      {h:"Exam tip", tip:true, body:"Operational Procedures is 22% of the Core 2 exam — don't skip it! Many test-takers lose easy points here by focusing only on the technical domains. These questions reward common sense and professional behavior."}
+    ]
+  },
+  {
+    id:10, title:"Take Test", status:"not started",
+    type:"quiz"
+  },
+  {
+    id:11, title:"Reflection", status:"not started",
+    type:"reflection"
+  }
+];
+
+const quizData = [
+  {q:"A user is yelling about a recurring problem. What should you do first?",opts:["Tell them you'll fix it and hang up","Apologize and let them vent while actively listening","Immediately transfer them to a supervisor","Explain why the problem keeps happening"],ans:1,fb:"De-escalation starts with acknowledgment. Let the customer express their frustration, apologize sincerely, then move toward solving the problem."},
+  {q:"A customer says 'my internet keeps going out.' What's the best follow-up question?",opts:["Have you tried restarting your router?","Can you walk me through exactly what happens — when does it drop?","Is it a hardware or software issue?","Did you recently change any settings?"],ans:1,fb:"Open-ended questions ('walk me through what happens') surface more accurate information than yes/no or leading questions. Avoid jumping to solutions before fully understanding the problem."},
+  {q:"You discover illegal content on a user's device while performing repairs. What do you do?",opts:["Delete it to protect the user","Tell the user what you found","Report it to your supervisor following your organization's incident response policy","Document it in the ticket and continue working"],ans:2,fb:"The correct action is always to report through proper channels. Don't touch the content, don't tell the user, and don't investigate yourself. Chain of custody matters legally."},
+  {q:"Before leaving after a repair, what should you always do?",opts:["Ask the user to sign a release form","Have the user confirm the issue is resolved","Tell them to call back if it breaks again","Update the ticket with your solution"],ans:1,fb:"Never close an interaction without user confirmation of resolution. While updating the ticket is also required, the immediate final step is confirming with the customer that the problem is fixed."},
+  {q:"A technician is working on a user's PC and notices documents with sensitive financial information on the desktop. What is the correct action?",opts:["Review them to make sure they're backed up","Ignore them and focus only on the task at hand","Ask the user if they need help organizing their files","Mention to the user that their files are visible to anyone"],ans:1,fb:"The principle of minimum necessary access means you only engage with what's required to complete your task. Viewing, commenting on, or engaging with sensitive data you don't need to see violates privacy best practices."},
+  {q:"A user asks when their laptop will be ready. You're not sure yet. What's the best response?",opts:["'I don't know — it depends on the problem'","'It should be done soon'","'I'll have a full diagnosis by noon and will call you with a timeline at that point'","'These things take as long as they take'"],ans:2,fb:"Always give a specific next step and time commitment. Vague answers like 'soon' or 'I don't know' erode trust. Commit to when you'll have more information, then honor that commitment."},
+  {q:"Which phrase best demonstrates positive professional language?",opts:["'That's not my department'","'I can't get to that until next week'","'Let me connect you with the right person who handles that'","'You should have reported this sooner'"],ans:2,fb:"Reframe every limitation as a positive action you're taking. 'Let me connect you' shows ownership and helpfulness, while 'not my department' feels dismissive and unprofessional."},
+  {q:"A technician closes a ticket because they believe the issue is fixed without contacting the customer. This is:",opts:["Acceptable if the fix was obvious","Acceptable if the ticket has been open more than 24 hours","A violation of proper resolution procedures","Fine as long as the documentation is complete"],ans:2,fb:"Tickets must never be closed without customer confirmation. The customer defines resolution, not the technician. Always verify with the user before closing."},
+  {q:"What is the purpose of a 'warm transfer' when escalating?",opts:["Transferring calls faster to reduce hold time","Introducing the customer to the next technician and briefing them before stepping away","Keeping the customer on hold while you brief the next tech","Having the customer explain the problem again to the new tech"],ans:1,fb:"A warm transfer means the customer never has to repeat themselves. You stay on the line, introduce the customer to the escalation contact, provide a full brief, and only then step away. Cold transfers are one of the biggest customer frustration drivers."},
+  {q:"You solve a complex issue that took 3 hours to troubleshoot. What should you do before closing the ticket?",opts:["Close it quickly so your metrics look good","Document only the final solution to keep the ticket concise","Document the problem description, all steps tried, the root cause, and the solution — then consider writing a knowledge base article","Ask your supervisor if documentation is required for this type of issue"],ans:2,fb:"Every complex resolved issue is an opportunity to prevent future recurrence. Document fully and contribute to the knowledge base when appropriate. This is a mark of a professional technician."}
+];
+
+let current = 0;
+let completed = new Set();
+let quizAnswers = [];
+let quizStep = 0;
+let quizDone = false;
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = modules.map((m,i)=>`
+    <div class="nav-item ${i===current?'active':''} ${completed.has(i)?'done':''}" onclick="go(${i})">
+      <span class="nav-title">${m.title}</span>
+      <span class="nav-status">${completed.has(i)?'✓ Complete': i===current?'In progress':'Not started'}</span>
+    </div>
+  `).join('');
+}
+
+function go(i){
+  current=i;
+  renderNav();
+  renderMain();
+  document.getElementById('main-area').scrollTop=0;
+}
+
+function renderMain(){
+  const m = modules[current];
+  const area = document.getElementById('main-area');
+  if(m.type==='quiz'){renderQuiz();return;}
+  if(m.type==='reflection'){renderReflection();return;}
+  
+  let html = `<div class="lesson-view">
+    <div class="lesson-tag">${m.tag}</div>
+    <div class="lesson-title">${m.title}</div>
+    <div class="lesson-sub">${m.sub}</div>`;
+  
+  m.sections.forEach(s=>{
+    if(s.tip){
+      html+=`<div class="tip"><strong>Exam tip: </strong>${s.body}</div>`;
+      return;
+    }
+    if(s.warn){
+      html+=`<div class="warn"><strong>Important: </strong>${s.body}</div>`;
+      return;
+    }
+    html+=`<div class="section-h">${s.h}</div>`;
+    if(s.cards){
+      s.cards.forEach(c=>{
+        html+=`<div class="card"><div class="card-title">${c.t}</div><div class="card-body">${c.b}</div></div>`;
+      });
+    }
+    if(s.scenarios){
+      s.scenarios.forEach((sc,si)=>{
+        html+=`<div class="scenario">
+          <div class="scenario-label">Scenario ${si+1}</div>
+          <div class="scenario-text">${sc.q}</div>
+          <button class="reveal-btn" onclick="reveal(this)">Show best approach</button>
+          <div class="scenario-answer">${sc.a}</div>
+        </div>`;
+      });
+    }
+  });
+  
+  html+=`</div>`;
+  
+  const prog = Math.round(completed.size/modules.length*100);
+  const isLast = current===modules.length-1;
+  const nextLabel = current===9?'Take the test':'Next lesson →';
+  
+  area.innerHTML = html+`
+    <div class="bottom-bar">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+        <span style="font-size:12px;color:var(--color-text-tertiary);white-space:nowrap">${prog}% complete</span>
+      </div>
+      ${current>0?`<button class="btn-sec" onclick="go(${current-1})">← Back</button>`:''}
+      ${current<modules.length-1?`<button class="btn-primary" onclick="advance()">${nextLabel}</button>`:''}
+    </div>`;
+}
+
+function reveal(btn){
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show')?'Hide answer':'Show best approach';
+}
+
+function advance(){
+  completed.add(current);
+  go(current+1);
+}
+
+function renderQuiz(){
+  if(quizDone){renderScore();return;}
+  const area = document.getElementById('main-area');
+  const q = quizData[quizStep];
+  const prog = Math.round(quizStep/quizData.length*100);
+  area.innerHTML=`
+    <div class="quiz-view">
+      <div class="lesson-tag">Knowledge Check</div>
+      <div class="lesson-title">Take Test</div>
+      <div style="margin-top:20px">
+        <div class="q-num">Question ${quizStep+1} of ${quizData.length}</div>
+        <div class="q-text">${q.q}</div>
+        ${q.opts.map((o,i)=>`<div class="q-opt" id="opt${i}" onclick="selectOpt(${i})">${o}</div>`).join('')}
+        <div class="q-feedback" id="qfb"></div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+        <span style="font-size:12px;color:var(--color-text-tertiary)">${quizStep+1}/${quizData.length}</span>
+      </div>
+      <button class="btn-primary" id="nextq" style="display:none" onclick="nextQ()">Next →</button>
+    </div>`;
+}
+
+let selectedOpt = null;
+function selectOpt(i){
+  if(selectedOpt!==null)return;
+  selectedOpt=i;
+  const q = quizData[quizStep];
+  quizAnswers.push(i===q.ans?1:0);
+  document.querySelectorAll('.q-opt').forEach((el,idx)=>{
+    if(idx===q.ans)el.classList.add('correct');
+    else if(idx===i)el.classList.add('wrong');
+    el.style.pointerEvents='none';
+  });
+  const fb = document.getElementById('qfb');
+  fb.className='q-feedback show '+(i===q.ans?'ok':'no');
+  fb.textContent=(i===q.ans?'✓ Correct — ':'✗ Incorrect — ')+q.fb;
+  document.getElementById('nextq').style.display='block';
+}
+
+function nextQ(){
+  selectedOpt=null;
+  quizStep++;
+  if(quizStep>=quizData.length){quizDone=true;completed.add(10);renderScore();}
+  else renderQuiz();
+}
+
+function renderScore(){
+  const area = document.getElementById('main-area');
+  const score = quizAnswers.reduce((a,b)=>a+b,0);
+  const pct = Math.round(score/quizData.length*100);
+  const pass = pct>=70;
+  area.innerHTML=`
+    <div class="score-view">
+      <div class="lesson-tag">Results</div>
+      <div class="lesson-title">Knowledge Check Complete</div>
+      <div class="score-big">${pct}%</div>
+      <div class="score-label">${score} out of ${quizData.length} correct</div>
+      <div style="margin:20px 0">
+        <span class="badge badge-blue">${pass?'✓ Passed — 70% threshold met':'Review recommended — below 70%'}</span>
+      </div>
+      <p style="font-size:14px;color:var(--color-text-secondary);max-width:380px;margin:0 auto 24px;line-height:1.6">
+        ${pass?'Great work! You have a solid grasp of the communication and professionalism content. Review any missed questions before exam day.':'Review the lessons for the questions you missed. Focus on ethical scenarios and de-escalation — these are common on the exam.'}
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn-sec" onclick="retakeQuiz()">Retake test</button>
+        <button class="btn-primary" onclick="go(11)">Continue →</button>
+      </div>
+    </div>`;
+}
+
+function retakeQuiz(){quizAnswers=[];quizStep=0;quizDone=false;selectedOpt=null;renderQuiz();}
+
+function renderReflection(){
+  const area = document.getElementById('main-area');
+  area.innerHTML=`
+    <div class="lesson-view">
+      <div class="lesson-tag">Reflection</div>
+      <div class="lesson-title">Reflect on what you've learned</div>
+      <div class="lesson-sub">Consolidate your knowledge before moving on</div>
+      <div class="section-h">Three things to ask yourself</div>
+      <div class="card"><div class="card-title">What was most surprising?</div><div class="card-body">Was there a concept that challenged a habit you already had? Communication skills feel intuitive, but the professional standards — like never closing a ticket without user confirmation, or how to handle illegal content — are specific and testable.</div></div>
+      <div class="card"><div class="card-title">Where might you struggle on the job?</div><div class="card-body">Most technicians find de-escalation hardest — it's natural to get defensive or rush to fix things. Identify your own tendencies and practice the frameworks: LAST, warm transfers, active restating.</div></div>
+      <div class="card"><div class="card-title">What will you do differently?</div><div class="card-body">Pick one specific behavior change from this course. Maybe it's updating tickets in real time. Maybe it's following up with users 24 hours after a fix. One concrete change is worth more than memorizing all the concepts.</div></div>
+      <div class="tip"><strong>You're ready. </strong>You've covered all 10 learning modules and completed the knowledge check. This material covers the communication and professionalism portion of Domain 4 of the CompTIA A+ Core 2 exam (220-1102). Good luck!</div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-sec" onclick="go(10)">← Review test</button>
+      <span style="font-size:13px;color:var(--color-text-secondary)">Course complete 🎉</span>
+    </div>`;
+  completed.add(11);renderNav();
+}
+
+renderNav();
+renderMain();
+</script>
